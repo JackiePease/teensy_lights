@@ -4,7 +4,7 @@ const dgram = require('dgram');
 const Util = require('./util');
 const Network = require('./network');
 
-const NODE_NAME = 'HueDMX';
+const NODE_NAME = 'LightWall';
 const PORT = 6454;
 const HEADER = 'Art-Net\0';
 const OPCODE_OUTPUT = 0x5000;     // ArtDMX data packet

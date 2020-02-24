@@ -56,16 +56,36 @@ void setup() {
   leds.show();
 }
 
-int incomingByte;
+//int incomingByte;
 int messageOffset;
 int nextColour = 0;
-int colourByte = 0;
+//int colourByte = 0;
+
+
+char buf[512];
 
 void loop() { 
 
   if (Serial.available() > 0) {
-    incomingByte = Serial.read();
+    String input = Serial.readStringUntil('\n');
+
+Serial.println(input);
     
+    hexstr_to_char(input);
+
+    Serial.println("ok");
+    
+    messageOffset = buf[1] | buf[0] << 8;
+
+    for(int x = 0; x < 170; x++)
+    {      
+      nextColour = (buf[(x*3)+2] << 16)  | (buf[(x*3)+3] << 8) | buf[(x*3)+3];
+      
+      leds.setPixel(messageOffset+x, nextColour);
+      leds.show();
+    }
+    
+    /*
     if(incomingByte == 0x01){      // new message started      
       leds.show();  
       while(!Serial.available()){}
@@ -87,8 +107,25 @@ void loop() {
         colourByte = 0;
         nextColour = 0;
       }
-    }      
+    }  */
+        
   }
 }
+
+void hexstr_to_char(String hexstr)
+{
+    Serial.println(hexstr.length(), HEX);
     
+    /*
+    size_t len = strlen(hexstr);
+    size_t final_len = len / 2;
+    
+    for (size_t i=0, j=0; j<final_len; i+=2, j++)
+    {
+        buf[j] = (hexstr[i] <= '9') ? (hexstr[i] - '0') : (hexstr[i] - 'A' + 10);
+        buf[j] *= 16;
+        buf[j] += (hexstr[i+1] <= '9') ? (hexstr[i+1] - '0') : (hexstr[i+1] - 'A' + 10);
+    }
+    */
+}
   
