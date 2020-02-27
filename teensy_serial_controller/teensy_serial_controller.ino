@@ -38,75 +38,61 @@
   color config (WS2811_RGB, WS2811_GRB, etc) they require.
 */
 
-#include <OctoWS2811.h>
+//#include <OctoWS2811.h>
 
 const int ledsPerStrip = 100;
 
-DMAMEM int displayMemory[ledsPerStrip*6];
-int drawingMemory[ledsPerStrip*6];
+//DMAMEM int displayMemory[ledsPerStrip*6];
+//int drawingMemory[ledsPerStrip*6];
 
-const int config = WS2811_GRB | WS2811_800kHz;
+//const int config = WS2811_GRB | WS2811_800kHz;
 
-OctoWS2811 leds(ledsPerStrip, displayMemory, drawingMemory, config);
+//OctoWS2811 leds(ledsPerStrip, displayMemory, drawingMemory, config);
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
+
+  // use arduino built in LED
+  pinMode(LED_BUILTIN, OUTPUT);
   
-  leds.begin();
-  leds.show();
+  //leds.begin();
+  //leds.show();
 }
 
-//int incomingByte;
+
 int messageOffset;
-int nextColour = 0;
-//int colourByte = 0;
+long nextColour = 0;
 
-
-char buf[512];
+int buf[512];
 
 void loop() { 
 
   if (Serial.available() > 0) {
-
     
     String input = Serial.readStringUntil('\n');
-    Serial.println(input);
     hexstr_to_char((char*)input.c_str());
 
     messageOffset = buf[1] | buf[0] << 8;
 
-    for(int x = 0; x < 170; x++)
+    for(int x = 0, j = 2, l = messageOffset; x < 170; x++, j+=3, l++)
     {      
-      nextColour = (buf[(x*3)+2] << 16)  | (buf[(x*3)+3] << 8) | buf[(x*3)+3];
+      nextColour = buf[j] * 256L;
+      nextColour = (nextColour + buf[j+1]) * 256L;
+      nextColour += buf[j+2];
+
+      //leds.setPixel(l, nextColour);
       
-      leds.setPixel(messageOffset+x, nextColour);
-      leds.show();
-    }
-    
-    /*
-    if(incomingByte == 0x01){      // new message started      
-      leds.show();  
-      while(!Serial.available()){}
-      messageOffset = Serial.read();
-      while(!Serial.available()){}
-      messageOffset = messageOffset | Serial.read() << 8;
-       
-      Serial.println("offset ");
-      Serial.println(messageOffset);
-    } else {
-      nextColour = incomingByte | nextColour << 8;
-      colourByte++;
-      if(colourByte == 3)
+      // use built in LED as light number 0
+      if(l == 0)
       {
-        Serial.println("colour ");
-        Serial.println(nextColour);
-        leds.setPixel(messageOffset, nextColour);
-        messageOffset++;
-        colourByte = 0;
-        nextColour = 0;
+        if(nextColour == 0)
+          digitalWrite(LED_BUILTIN, LOW);
+        else
+          digitalWrite(LED_BUILTIN, HIGH);
       }
-    }  */
-        
+    }
+    //leds.show();
+    
   }
 }
 
@@ -114,13 +100,13 @@ void hexstr_to_char(char* hexstr)
 {
     size_t len = strlen(hexstr);
     size_t final_len = len / 2;
-    
 
     for (size_t i=0, j=0; j<final_len; i+=2, j++)
     {
-        buf[j] = (hexstr[i] <= '9') ? (hexstr[i] - '0') : (hexstr[i] - 'A' + 10);
-        buf[j] *= 16;
-        buf[j] += (hexstr[i+1] <= '9') ? (hexstr[i+1] - '0') : (hexstr[i+1] - 'A' + 10);
+
+        buf[j] = (((hexstr[i] <= '9') ? (hexstr[i] - '0') : (hexstr[i] - 'A' + 10)) * 16 )
+          + ((hexstr[i+1] <= '9') ? (hexstr[i+1] - '0') : (hexstr[i+1] - 'A' + 10));
+
     }
     
 }

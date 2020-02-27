@@ -7,8 +7,8 @@ const config = [
         fromUniverse: 1,
         toUniverse: 6,
         universeSize: 510,
-        serialPort: "/dev/tty.usbmodem48204301",
-        baudRate: 9600
+        serialPort: "/dev/tty.usbmodem14101",
+        baudRate: 115200
     }
 ];
 
@@ -30,12 +30,6 @@ for(var t = 0; t < config.length; t++){
 ArtNet.listen('127.0.0.1', data => {
     
     var firstLight = data.dmx.indexOf(255) / 3;
-    // console.log({
-    //     s:data.sequence,
-    //     u:data.universe,
-    //     l:data.length,
-    //     o: firstLight > 0 ? firstLight : 0  // first light being set
-    // });
     
     var tty = universes[data.universe];
 
