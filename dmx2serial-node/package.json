@@ -14,6 +14,6 @@
     "conf": "^1.1.0",
     "inquirer": "^3.0.6",
     "minimist": "^1.2.0",
-    "serialport": "^8.0.7"
+    "serialport": "^11.0.0"
   }
 }
